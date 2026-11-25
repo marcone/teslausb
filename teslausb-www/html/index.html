@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
@@ -13,6 +16,8 @@
 <link rel="stylesheet" href="contextmenu.css">
 <script src="contextmenu.js"></script>
 <script src="filebrowser.js"></script>
+<script src="protobuf.min.js"></script>
+<script src="dashcam-mp4.js"></script>
 <meta name="msapplication-TileColor" content="#00aba9">
 <meta name="msapplication-config" content="/icons/browserconfig.xml">
 <meta name="theme-color" content="#ffffff">
@@ -237,8 +242,19 @@ iframe {
     z-index:11;
   }
 
-  .navbar + div {
+  .videoholder {
     height: calc(100% - 50px);
+  }
+  .videoholderparent {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+  .videoholderparent .videoholder {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
   }
 
   .videoholder.layout6 {
@@ -804,6 +820,278 @@ video {
   white-space: pre-line;
 }
 
+
+
+/* Dedicated Vehicle Telemetry Dashboard Bar (Outside Video Canvas) */
+#telemetry-dashboard-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #181b20;
+  border-bottom: 1px solid #30363d;
+  padding: 4px 16px;
+  min-height: 44px;
+  max-height: 44px;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #fff;
+  z-index: 10;
+  flex-shrink: 0;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+}
+.dash-blink {
+  width: 20px;
+  text-align: center;
+  font-size: 16px;
+  color: #484f58;
+  transition: color 0.1s, text-shadow 0.1s;
+  flex-shrink: 0;
+}
+.dash-speed-box {
+  width: 100px;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.dash-kmh {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.dash-mph {
+  font-size: 11px;
+  color: #8b949e;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.dash-gear {
+  width: 28px;
+  height: 24px;
+  font-size: 13px;
+  font-weight: 700;
+  background: #2b323c;
+  color: #f0f6fc;
+  border: 1px solid #484f58;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.dash-ap {
+  width: 92px;
+  height: 24px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #30363d;
+  color: #8b949e;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+.dash-brake {
+  width: 62px;
+  height: 24px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  color: #484f58;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.1s;
+}
+.dash-steer-box {
+  width: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.dash-pedal-box {
+  width: 82px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.dash-lbl {
+  color: #8b949e;
+  font-size: 11px;
+}
+.dash-val {
+  font-size: 12px;
+  color: #f0f6fc;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.dash-mps-box {
+  width: 74px;
+  font-size: 12px;
+  color: #8b949e;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.dash-gps-box {
+  width: 175px;
+  font-size: 11px;
+  color: #58a6ff;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dash-frame-box {
+  width: 85px;
+  font-size: 11px;
+  color: #6e7681;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* --- Single-Camera & Dual-Camera High Performance Layouts --- */
+.videoholder.layout7 {
+  grid-template-columns: 100% !important;
+  grid-template-areas:
+    "frontview"
+    "infoview" !important;
+  justify-items: center;
+}
+.videoholder.layout7 .videogriditem:not(.frontview):not(.infoview) {
+  display: none !important;
+}
+.videoholder.layout7 #frontview,
+.videoholder.layout7 #frontviewfreeze {
+  width: 100% !important;
+  max-width: 1200px !important;
+  max-height: 75vh !important;
+}
+
+.videoholder.layout8 {
+  grid-template-columns: 100% !important;
+  grid-template-areas:
+    "backview"
+    "infoview" !important;
+  justify-items: center;
+}
+.videoholder.layout8 .videogriditem:not(.backview):not(.infoview) {
+  display: none !important;
+}
+.videoholder.layout8 #backview,
+.videoholder.layout8 #backviewfreeze {
+  width: 100% !important;
+  max-width: 1200px !important;
+  max-height: 75vh !important;
+}
+
+.videoholder.layout9 {
+  grid-template-columns: 100% !important;
+  grid-template-areas:
+    "leftrepeaterview"
+    "infoview" !important;
+  justify-items: center;
+}
+.videoholder.layout9 .videogriditem:not(.leftrepeaterview):not(.infoview) {
+  display: none !important;
+}
+.videoholder.layout9 #leftrepeaterview,
+.videoholder.layout9 #leftrepeaterviewfreeze {
+  width: 100% !important;
+  max-width: 1200px !important;
+  max-height: 75vh !important;
+}
+
+.videoholder.layout10 {
+  grid-template-columns: 100% !important;
+  grid-template-areas:
+    "rightrepeaterview"
+    "infoview" !important;
+  justify-items: center;
+}
+.videoholder.layout10 .videogriditem:not(.rightrepeaterview):not(.infoview) {
+  display: none !important;
+}
+.videoholder.layout10 #rightrepeaterview,
+.videoholder.layout10 #rightrepeaterviewfreeze {
+  width: 100% !important;
+  max-width: 1200px !important;
+  max-height: 75vh !important;
+}
+
+.videoholder.layout11 {
+  grid-template-columns: 50% 50% !important;
+  grid-template-areas:
+    "frontview backview"
+    "infoview mapview" !important;
+}
+.videoholder.layout11 .videogriditem:not(.frontview):not(.backview):not(.infoview):not(.mapview) {
+  display: none !important;
+}
+
+.videoholder.layout12 {
+  grid-template-columns: 50% 50% !important;
+  grid-template-areas:
+    "leftrepeaterview rightrepeaterview"
+    "infoview mapview" !important;
+}
+.videoholder.layout12 .videogriditem:not(.leftrepeaterview):not(.rightrepeaterview):not(.infoview):not(.mapview) {
+  display: none !important;
+}
+
+.videoholder.layout13 {
+  grid-template-columns: 33.33% 33.34% 33.33% !important;
+  grid-template-areas:
+    "leftrepeaterview frontview rightrepeaterview"
+    "mapview infoview ." !important;
+  justify-items: center;
+}
+.videoholder.layout13 .videogriditem:not(.leftrepeaterview):not(.frontview):not(.rightrepeaterview):not(.infoview):not(.mapview) {
+  display: none !important;
+}
+
+.videoholder.layout14 {
+  grid-template-columns: 33.33% 33.34% 33.33% !important;
+  grid-template-areas:
+    "leftrepeaterview backview rightrepeaterview"
+    "mapview infoview ." !important;
+  justify-items: center;
+}
+.videoholder.layout14 .videogriditem:not(.leftrepeaterview):not(.backview):not(.rightrepeaterview):not(.infoview):not(.mapview) {
+  display: none !important;
+}
+
+#layouts.subnav-content {
+  left: initial !important;
+  right: 0 !important;
+  width: 230px !important;
+  max-height: 80vh !important;
+  overflow-y: auto !important;
+}
+
+#layouts.subnav-content .dropdownitem {
+  width: 214px !important;
+  height: auto !important;
+  min-height: 28px !important;
+  padding: 6px 8px !important;
+  font-size: 13px !important;
+  line-height: 1.3 !important;
+}
 </style>
 </head>
 <body>
@@ -965,15 +1253,57 @@ video {
             <path d="M 2 6 L 8 6 L 8 2 L 2 2 z M 10 6 L 16 6 L 16 2 L 10 2 z M 18 6 L 24 6 L 24 2 L 18 2 z M 2 12 L 8 12 L 8 8 L 2 8 z M 10 12 L 16 12 L 16 8 L 10 8 z M 18 12 L 24 12 L 24 8 L 18 8 z"/>
           </svg>
           <div id="layouts" class="subnav-content">
-            <div class="dropdownitem layoutitem" onclick="setLayout(1)">Sides on top, rear on bottom, mirrored</div>
-            <div class="dropdownitem layoutitem" onclick="setLayout(2)">Side and rear on bottom, mirrored</div>
-            <div class="dropdownitem layoutitem" onclick="setLayout(3)">Side and rear on bottom, looking back</div>
-            <div class="dropdownitem layoutitem" onclick="setLayout(4)">Mobile layout,<br>mirrored</div>
-            <div class="dropdownitem layoutitem" onclick="setLayout(5)">Mobile layout,<br>looking back</div>
-            <div class="dropdownitem layoutitem pillar" onclick="setLayout(6)">Pillars on the side</div>
+            <div class="dropdownitem layoutitem" data-layout="1" onclick="setLayout(1)">Sides on top, rear on bottom, mirrored</div>
+            <div class="dropdownitem layoutitem" data-layout="2" onclick="setLayout(2)">Side and rear on bottom, mirrored</div>
+            <div class="dropdownitem layoutitem" data-layout="3" onclick="setLayout(3)">Side and rear on bottom, looking back</div>
+            <div class="dropdownitem layoutitem" data-layout="4" onclick="setLayout(4)">Mobile layout,<br>mirrored</div>
+            <div class="dropdownitem layoutitem" data-layout="5" onclick="setLayout(5)">Mobile layout,<br>looking back</div>
+            <div class="dropdownitem layoutitem pillar" data-layout="6" onclick="setLayout(6)">Pillars on the side</div>
+            <div style="border-top:1px solid #555;margin:4px 0;"></div>
+            <div class="dropdownitem layoutitem" data-layout="7" onclick="setLayout(7)" style="color:#64b5f6;font-weight:bold;">⚡ Front Only (1 Cam - Smooth)</div>
+            <div class="dropdownitem layoutitem" data-layout="8" onclick="setLayout(8)" style="color:#64b5f6;font-weight:bold;">⚡ Rear Only (1 Cam - Smooth)</div>
+            <div class="dropdownitem layoutitem" data-layout="9" onclick="setLayout(9)" style="color:#64b5f6;font-weight:bold;">⚡ Left Side Only (1 Cam)</div>
+            <div class="dropdownitem layoutitem" data-layout="10" onclick="setLayout(10)" style="color:#64b5f6;font-weight:bold;">⚡ Right Side Only (1 Cam)</div>
+            <div style="border-top:1px solid #555;margin:4px 0;"></div>
+            <div class="dropdownitem layoutitem" data-layout="11" onclick="setLayout(11)" style="color:#81c784;font-weight:bold;">⚡ Front & Rear (2 Cams)</div>
+            <div class="dropdownitem layoutitem" data-layout="12" onclick="setLayout(12)" style="color:#81c784;font-weight:bold;">⚡ Left & Right (2 Cams)</div>
+            <div style="border-top:1px solid #555;margin:4px 0;"></div>
+            <div class="dropdownitem layoutitem" data-layout="13" onclick="setLayout(13)" style="color:#ffb74d;font-weight:bold;">⚡ Left, Front, Right (3 Cams)</div>
+            <div class="dropdownitem layoutitem" data-layout="14" onclick="setLayout(14)" style="color:#ffb74d;font-weight:bold;">⚡ Left, Back, Right (3 Cams)</div>
           </div>
         </div>
       </div>
+
+      <!-- Dedicated Vehicle Telemetry Dashboard Bar (Outside Video Canvas) -->
+      <div id="telemetry-dashboard-bar" style="display:none;">
+        <span id="dash-blink-left" class="dash-blink">◀</span>
+        <div class="dash-speed-box">
+          <div id="dash-speed-kmh" class="dash-kmh">0 km/h</div>
+          <div id="dash-speed-mph" class="dash-mph">0 mph</div>
+        </div>
+        <span id="dash-gear" class="dash-gear">D</span>
+        <span id="dash-ap" class="dash-ap">MANUAL</span>
+        <span id="dash-brake" class="dash-brake">BRAKE</span>
+        <div class="dash-steer-box">
+          <span class="dash-lbl">Steer:</span>
+          <span id="dash-steer" class="dash-val">0.0°</span>
+        </div>
+        <span id="dash-blink-right" class="dash-blink">▶</span>
+        <div class="dash-pedal-box">
+          <span class="dash-lbl">Pedal:</span>
+          <span id="dash-pedal" class="dash-val">0%</span>
+        </div>
+        <div class="dash-mps-box">
+          <span id="dash-mps" class="dash-mps">0.0 m/s</span>
+        </div>
+        <div class="dash-gps-box">
+          <span id="dash-gps" class="dash-gps">--</span>
+        </div>
+        <div class="dash-frame-box">
+          <span id="dash-frame" class="dash-frame"></span>
+        </div>
+      </div>
+
       <div class="videoholder layout3">
         <video disableRemotePlayback playsinline id="leftrepeaterview" class="videogriditem leftrepeaterview" style="z-index:1;"></video>
         <canvas id="leftrepeaterviewfreeze" class="videogriditem leftrepeaterview"  style="z-index:0;"></canvas>
@@ -1124,7 +1454,110 @@ showcontrols();
 
 var currentLayout = 1;
 
+function applyLayoutCameraVisibility(layout) {
+  if (typeof currentsequence === 'undefined' || !currentsequence || typeof currentsequence.currentSegmentIdx !== 'function') {
+    return;
+  }
+  var segIdx = currentsequence.currentSegmentIdx();
+  var seg = currentsequence.getSegmentByIndex(segIdx);
+  if (!seg) return;
+
+  var prefix = "TeslaCam/" + seg.group + "/" + seg.sequence + "/";
+  var vis = getVisibleCamerasForLayout(layout);
+  var isPlaying = currentsequence.isPlaying();
+
+  // Determine current playback position
+  var curPos = 0;
+  if (seg.longestvideoelem && !isNaN(seg.longestvideoelem.currentTime) && seg.longestvideoelem.currentTime > 0) {
+    curPos = seg.longestvideoelem.currentTime;
+  } else {
+    var slider = document.getElementById('position');
+    if (slider) curPos = ((parseInt(slider.value) || 0) % 60000) / 1000;
+  }
+
+  var camDefs = [
+    { name: 'leftrepeater', file: seg.leftrepeater, elem: videoelems[0], canvas: canvaselems[0] },
+    { name: 'leftpillar',   file: seg.leftpillar,   elem: videoelems[1], canvas: canvaselems[1] },
+    { name: 'front',        file: seg.front,        elem: videoelems[2], canvas: canvaselems[2] },
+    { name: 'rightrepeater',file: seg.rightrepeater,elem: videoelems[3], canvas: canvaselems[3] },
+    { name: 'rightpillar',  file: seg.rightpillar,  elem: videoelems[4], canvas: canvaselems[4] },
+    { name: 'back',         file: seg.back,         elem: videoelems[5], canvas: canvaselems[5] }
+  ];
+
+  var newActive = [];
+  var newLongest = null;
+
+  for (var i = 0; i < camDefs.length; i++) {
+    var def = camDefs[i];
+    var v = def.elem;
+    var c = def.canvas;
+    var wanted = Boolean(vis[def.name] && def.file);
+
+    if (wanted) {
+      var targetSrc = prefix + def.file;
+      var hasSrc = v.src && (v.src.indexOf(encodeURI(def.file)) !== -1 || v.src.indexOf(def.file) !== -1);
+
+      if (!hasSrc) {
+        log("[LayoutSwitch] Activating camera: " + def.name);
+        v.src = cachebustingurl(targetSrc);
+        v.currentTime = curPos;
+        v.onended = seg.onVideoEnded;
+        v.onerror = seg.onVideoError;
+        v.ondblclick = seg.onDblClickVideo;
+        if (isPlaying) {
+          v.play().catch(function() {});
+        }
+      } else {
+        log("[LayoutSwitch] Retaining active camera: " + def.name);
+        if (curPos > 0 && Math.abs(v.currentTime - curPos) > 0.5) {
+          v.currentTime = curPos;
+        }
+        if (isPlaying && v.paused) {
+          v.play().catch(function() {});
+        }
+      }
+
+      v.style.visibility = "inherit";
+      if (c) {
+        var ctx = c.getContext("2d");
+        ctx.clearRect(0, 0, c.width, c.height);
+      }
+
+      newActive.push(v);
+      if (!newLongest || (v.duration && v.duration > (newLongest.duration || 0))) {
+        newLongest = v;
+      }
+    } else {
+      if (v.src && v.src !== '') {
+        log("[LayoutSwitch] Deactivating camera: " + def.name);
+        v.pause();
+        v.removeAttribute('src');
+        v.load();
+      }
+      v.style.visibility = "hidden";
+      if (c) {
+        var ctx = c.getContext("2d");
+        ctx.clearRect(0, 0, c.width, c.height);
+      }
+    }
+  }
+
+  seg.activevideoelems = newActive;
+  seg.numangles = newActive.length;
+  if (newLongest) {
+    seg.longestvideoelem = newLongest;
+    newLongest.ontimeupdate = seg.onTimeUpdate;
+    newLongest.onseeked = seg.onTimeUpdate;
+  }
+  seg.readytoplay = true;
+  unfreezeVideoElems();
+}
+
 function setLayout(layout) {
+  layout = Number(layout) || 1;
+  currentLayout = layout;
+  localStorageSet("layout", layout);
+
   var leftrepeaterview = document.getElementById("leftrepeaterview");
   var leftpillarview = document.getElementById("leftpillarview");
   var rightrepeaterview = document.getElementById("rightrepeaterview");
@@ -1133,80 +1566,42 @@ function setLayout(layout) {
   var videogrid = document.querySelector(".videoholder");
 
   if (layout == 3 || layout == 5 || layout == 6) {
-    leftrepeaterview.classList.remove("flipped");
-    rightrepeaterview.classList.remove("flipped");
-    backview.classList.remove("flipped");
+    if (leftrepeaterview) leftrepeaterview.classList.remove("flipped");
+    if (rightrepeaterview) rightrepeaterview.classList.remove("flipped");
+    if (backview) backview.classList.remove("flipped");
+  } else if (layout == 1 || layout == 2 || layout == 4 || layout == 13 || layout == 14) {
+    if (leftrepeaterview) leftrepeaterview.classList.add("flipped");
+    if (rightrepeaterview) rightrepeaterview.classList.add("flipped");
+    if (layout == 14 || layout == 1 || layout == 2 || layout == 4) {
+      if (backview) backview.classList.add("flipped");
+    }
   }
 
-  if (layout == 1) {
-    // mirrorleft-front-mirrorright on top, map-mirrorrear-info on bottom
-    leftrepeaterview.classList.add("flipped");
-    rightrepeaterview.classList.add("flipped");
-    backview.classList.add("flipped");
-    videogrid.classList="videoholder layout1";
-  } else if (layout == 2) {
-    // map-front-info on top, mirrorleft-mirrorrear-mirrorright on bottom
-    leftrepeaterview.classList.add("flipped");
-    rightrepeaterview.classList.add("flipped");
-    backview.classList.add("flipped");
-    videogrid.classList="videoholder layout2";
-  } else if (layout == 4) {
-    // front on top, sides in middle, rear on bottom, mirrored
-    leftrepeaterview.classList.add("flipped");
-    rightrepeaterview.classList.add("flipped");
-    backview.classList.add("flipped");
-    videogrid.classList="videoholder layout4";
-  } else if (layout == 5) {
-    // front on top, sides in middle, rear on bottom
-    videogrid.classList="videoholder layout5";
-  } else if (layout == 6) {
-    // map-front-info on top, pillars on the side, repeaters and rear on bottom
-    videogrid.classList="videoholder layout6";
+  if (layout >= 1 && layout <= 14) {
+    if (videogrid) videogrid.classList = "videoholder layout" + layout;
   } else {
-    layout = 3;
-    // (default) map-front-info on top, right-rear-left on bottom
-    videogrid.classList="videoholder layout3";
+    currentLayout = 3;
+    if (videogrid) videogrid.classList = "videoholder layout3";
   }
-  currentLayout = layout;
-  localStorageSet("layout", layout);
 
-  var l = document.querySelector("#layouts.subnav-content");
-  for (var i = 0; i < l.childElementCount; i++) {
-    var item = l.children[i];
-    if (i == (currentLayout - 1) ) {
+  // Update selected highlight in layout dropdown using data-layout attribute
+  var items = document.querySelectorAll("#layouts .layoutitem");
+  items.forEach(function(item) {
+    if (item.getAttribute("data-layout") == String(currentLayout)) {
       item.classList.add("selected");
     } else {
       item.classList.remove("selected");
     }
-  }
+  });
 
-  if (typeof currentsequence !== 'undefined') {
-    setTimeout(function() {
-      for (var i=0; i < 6;i++) {
-        var v = videoelems[i];
-        var c = canvaselems[i];
-        
-        if (v.clientWidth > 0 && v.clientHeight > 0) {
-            c.width = v.clientWidth;
-            c.height = v.clientHeight;
-        }
-
-        if (v.style.visibility == "hidden") {
-           var ctx = c.getContext("2d");
-           if (v.classList.contains("flipped")) {
-             ctx.scale(-1, 1);
-             ctx.drawImage(v, 0, 0, -c.width, c.height);
-           } else {
-             ctx.drawImage(v, 0, 0, c.width, c.height);
-           }
-        }
-      }
-    }, 50);
-  }
+  // Seamlessly adjust visible camera elements in-place without dropping frames or disappearing
+  applyLayoutCameraVisibility(currentLayout);
 }
 
 function cycleLayout() {
-  setLayout(currentLayout + 1);
+  var next = currentLayout + 1;
+  if (next > 14) next = 1;
+  setLayout(next);
 }
 
 setLayout(localStorageGet("layout"));
@@ -2079,6 +2474,7 @@ class VideoSegment {
       log("all videos loaded. Longest: " + this.longestvideoelem.id + ": " + this.longestvideoelem.duration);
       this.readytoplay = true;
       this.longestvideoelem.ontimeupdate = this.onTimeUpdate;
+      this.longestvideoelem.onseeked = this.onTimeUpdate;
       for (var vid of this.activevideoelems) {
         vid.onended=this.onVideoEnded;
         vid.onerror=this.onVideoError;
@@ -2122,11 +2518,20 @@ class VideoSegment {
 
     showDebugInfo();
 
+    showDebugInfo();
+    updateSeiTelemetryFromVideo(elem.currentTime, elem.duration);
+
     if (currentsequence.isPlaying()) {
+      var masterTime = elem.currentTime;
       for (var vid of this.activevideoelems) {
         if (vid != elem && vid.paused && !vid.ended && elem.currentTime > (elem.duration - vid.duration)) {
           log("starting vid");
           vid.play();
+        } else if (vid != elem && !vid.paused && !vid.ended) {
+          // Active sync: correct drift > 0.3s
+          if (Math.abs(vid.currentTime - masterTime) > 0.3) {
+            vid.currentTime = masterTime;
+          }
         }
       }
     } else {
@@ -2158,35 +2563,44 @@ class VideoSegment {
     var prefix = "TeslaCam/" + this.group + "/" + this.sequence + "/";
     log("===== segment =====");
     freezeVideoElems();
-    if (this.leftrepeater != undefined) {
+
+    var vis = getVisibleCamerasForLayout(currentLayout);
+
+    if (vis.leftrepeater && this.leftrepeater != undefined) {
       videoelems[0].src = cachebustingurl(prefix + this.leftrepeater);
     } else {
       videoelems[0].removeAttribute('src');
+      videoelems[0].load();
     }
-    if (this.leftpillar != undefined) {
+    if (vis.leftpillar && this.leftpillar != undefined) {
       videoelems[1].src = cachebustingurl(prefix + this.leftpillar);
     } else {
       videoelems[1].removeAttribute('src');
+      videoelems[1].load();
     }
-    if (this.front != undefined) {
+    if (vis.front && this.front != undefined) {
       videoelems[2].src = cachebustingurl(prefix + this.front);
     } else {
       videoelems[2].removeAttribute('src');
+      videoelems[2].load();
     }
-    if (this.rightrepeater != undefined) {
+    if (vis.rightrepeater && this.rightrepeater != undefined) {
       videoelems[3].src = cachebustingurl(prefix + this.rightrepeater);
     } else {
       videoelems[3].removeAttribute('src');
+      videoelems[3].load();
     }
-    if (this.rightpillar != undefined) {
+    if (vis.rightpillar && this.rightpillar != undefined) {
       videoelems[4].src = cachebustingurl(prefix + this.rightpillar);
     } else {
       videoelems[4].removeAttribute('src');
+      videoelems[4].load();
     }
-    if (this.back != undefined) {
+    if (vis.back && this.back != undefined) {
       videoelems[5].src = cachebustingurl(prefix + this.back);
     } else {
       videoelems[5].removeAttribute('src');
+      videoelems[5].load();
     }
 
     this.numangles = 0;
@@ -2218,6 +2632,12 @@ class VideoSegment {
     var tt = document.getElementById('totaltime');
     tt.innerText = " / " + timeString(currentsequence.length() * 60000);
 
+    if (this.front != undefined) {
+      loadSeiForVideo(prefix + this.front);
+    } else {
+      clearSeiData();
+    }
+
     this.initdefaults();
   }
 
@@ -2228,6 +2648,7 @@ class VideoSegment {
         // todo: account for differences in length
         vid.currentTime=position;
       }
+      updateSeiTelemetryFromVideo(position, this.longestvideoelem ? this.longestvideoelem.duration : 60);
       return;
     }
     log("deferred seekTo " + position);
@@ -2277,6 +2698,9 @@ ro.observe(t);
 
 /* a sequence of VideoSegments, e.g. a single sentry event, or a day's worth of RecentClips */
 class VideoSequence {
+  currentSegment() {
+    return this.getSegmentByIndex(this.currentsegmentidx);
+  }
   segments;
   segmentsbytime;
   sequencegroup; // RecentClips, SavedClips or SentryClips
@@ -2360,6 +2784,7 @@ class VideoSequence {
     this.onMapResize();
     this.onTickResize();
     this.showSentryLocation();
+    prefetchSequenceSei(this);
   }
 
   currentJson() {
@@ -2557,10 +2982,14 @@ class VideoSequence {
 
   onSeek(event) {
     this.seekTo(event.target.value);
+    const sec = (parseInt(event.target.value) % 60000) / 1000;
+    updateSeiTelemetryFromVideo(sec, 60);
   }
 
   onSeekEnd(event) {
     log("seek end");
+    const sec = (parseInt(event.target.value) % 60000) / 1000;
+    updateSeiTelemetryFromVideo(sec, 60);
   }
 
   seekTo(seektime) {
@@ -2594,6 +3023,7 @@ class VideoSequence {
     segment.seekTo((seektime % 60000) / 1000);
     this.onMapResize();
     this.showSentryLocation();
+    updateSeiTelemetryFromVideo((seektime % 60000) / 1000, 60);
   }
 
   next() {
@@ -3046,6 +3476,362 @@ setCurrentTabName();
 const mediaQuery = window.matchMedia('screen and (max-width: 824px)');
 mediaQuery.addListener(setCurrentTabName);
 
+
+
+// ============================================================================
+// Layout Camera Visibility Manager
+// ============================================================================
+function getVisibleCamerasForLayout(layout) {
+  switch (Number(layout)) {
+    case 7: return { front: true };
+    case 8: return { back: true };
+    case 9: return { leftrepeater: true };
+    case 10: return { rightrepeater: true };
+    case 11: return { front: true, back: true };
+    case 12: return { leftrepeater: true, rightrepeater: true };
+    case 13: return { leftrepeater: true, front: true, rightrepeater: true };
+    case 14: return { leftrepeater: true, back: true, rightrepeater: true };
+    default: return { leftrepeater: true, front: true, rightrepeater: true, back: true, leftpillar: true, rightpillar: true };
+  }
+}
+
+// ============================================================================
+// Tesla Dashcam SEI Telemetry Integration
+// ============================================================================
+// Tesla SEI Telemetry Engine (Protobuf + Fast Binary Parser)
+// ============================================================================
+const DASHCAM_PROTO_DEF = `syntax = "proto3";
+message SeiMetadata {
+  uint32 version = 1;
+  enum Gear { GEAR_PARK = 0; GEAR_DRIVE = 1; GEAR_REVERSE = 2; GEAR_NEUTRAL = 3; }
+  Gear gear_state = 2;
+  uint64 frame_seq_no = 3;
+  float vehicle_speed_mps = 4;
+  float accelerator_pedal_position = 5;
+  float steering_wheel_angle = 6;
+  bool blinker_on_left = 7;
+  bool blinker_on_right = 8;
+  bool brake_applied = 9;
+  enum AutopilotState { NONE = 0; SELF_DRIVING = 1; AUTOSTEER = 2; TACC = 3; }
+  AutopilotState autopilot_state = 10;
+  double latitude_deg = 11;
+  double longitude_deg = 12;
+  double heading_deg = 13;
+  double linear_acceleration_mps2_x = 14;
+  double linear_acceleration_mps2_y = 15;
+  double linear_acceleration_mps2_z = 16;
+};`;
+
+let g_seiType = null;
+let g_currentSeiUrl = null;
+let g_currentSeiMessages = null;
+const g_seiCache = new Map();
+const g_seiInFlight = new Map();
+
+function getSeiProtoType() {
+  if (g_seiType) return g_seiType;
+  try {
+    const protoLib = window.protobuf || protobuf;
+    if (protoLib && protoLib.parse) {
+      const root = protoLib.parse(DASHCAM_PROTO_DEF).root;
+      g_seiType = root.lookupType("SeiMetadata");
+      console.log("[SEI] Protobuf schema compiled inline successfully");
+    }
+  } catch (e) {
+    console.warn("[SEI] Inline protobuf parse error:", e);
+  }
+  return g_seiType;
+}
+
+// Precompile immediately
+getSeiProtoType();
+
+function fetchAndCacheSei(videoUrl) {
+  if (!videoUrl) return Promise.resolve([]);
+  if (g_seiCache.has(videoUrl)) {
+    return Promise.resolve(g_seiCache.get(videoUrl));
+  }
+  if (g_seiInFlight.has(videoUrl)) {
+    return g_seiInFlight.get(videoUrl);
+  }
+
+  const promise = (async () => {
+    let seiType = getSeiProtoType();
+    if (!seiType && window.DashcamHelpers) {
+      try {
+        const res = await DashcamHelpers.initProtobuf('dashcam.proto');
+        seiType = res.SeiMetadata;
+        g_seiType = seiType;
+      } catch (e) {}
+    }
+    if (!seiType) {
+      g_seiCache.set(videoUrl, []);
+      return [];
+    }
+
+    // 1. Fast Server CGI Slice (downloads only ~100-200 KB binary payload instead of 40 MB video file!)
+    try {
+      const cgiUrl = '/cgi-bin/get_sei.sh?file=' + encodeURIComponent(videoUrl);
+      const resp = await fetch(cgiUrl);
+      if (resp.ok) {
+        const buf = await resp.arrayBuffer();
+        if (buf.byteLength === 0) {
+          console.log(`[SEI] 0 telemetry frames for ${videoUrl} (vehicle parked)`);
+          const empty = [];
+          g_seiCache.set(videoUrl, empty);
+          return empty;
+        }
+
+        const mp4Helper = new DashcamMP4(new ArrayBuffer(0));
+        const view = new DataView(buf);
+        let pos = 0;
+        const msgs = [];
+        while (pos + 4 <= view.byteLength) {
+          const nalSize = view.getUint32(pos);
+          pos += 4;
+          if (pos + nalSize <= view.byteLength) {
+            const nal = new Uint8Array(buf, pos, nalSize);
+            const msg = mp4Helper.decodeSei(nal, seiType);
+            if (msg) msgs.push(msg);
+          }
+          pos += nalSize;
+        }
+        console.log(`[SEI] Cached ${msgs.length} telemetry frames for ${videoUrl} via Fast CGI (${buf.byteLength} bytes)`);
+        g_seiCache.set(videoUrl, msgs);
+        return msgs;
+      }
+    } catch (cgiErr) {
+      console.log("[SEI] Fast CGI fetch failed, falling back to MP4:", cgiErr);
+    }
+
+    // 2. Direct MP4 fallback only if CGI returns error/unavailable
+    try {
+      const fullUrl = cachebustingurl(videoUrl);
+      const resp = await fetch(fullUrl);
+      if (resp.ok) {
+        const buf = await resp.arrayBuffer();
+        const mp4 = new DashcamMP4(buf);
+        const msgs = mp4.extractSeiMessages(seiType);
+        console.log(`[SEI] Extracted & cached ${msgs.length} telemetry frames from MP4 for ${videoUrl}`);
+        g_seiCache.set(videoUrl, msgs);
+        return msgs;
+      }
+    } catch (err) {
+      console.log("[SEI] No telemetry found or fetch error for " + videoUrl);
+    }
+
+    const fallback = [];
+    g_seiCache.set(videoUrl, fallback);
+    return fallback;
+  })().finally(() => {
+    g_seiInFlight.delete(videoUrl);
+  });
+
+  g_seiInFlight.set(videoUrl, promise);
+  return promise;
+}
+
+async function prefetchSequenceSei(sequence) {
+  if (!sequence || !sequence.segments) return;
+  const prefix = "TeslaCam/" + sequence.sequencegroup + "/" + sequence.sequence + "/";
+  const seqId = sequence.sequence;
+  for (let i = 0; i < sequence.segments.length; i++) {
+    // If sequence changed while prefetching, abort prefetch loop
+    if (!currentsequence || currentsequence.sequence !== seqId) return;
+    const seg = sequence.segments[i];
+    if (seg && seg.front) {
+      const url = prefix + seg.front;
+      try {
+        await fetchAndCacheSei(url);
+      } catch (e) {}
+    }
+  }
+}
+
+async function loadSeiForVideo(videoUrl) {
+  g_currentSeiUrl = videoUrl;
+
+  if (g_seiCache.has(videoUrl)) {
+    g_currentSeiMessages = g_seiCache.get(videoUrl);
+    const slider = document.getElementById('position');
+    const v = document.getElementById('frontview');
+    const curSec = slider ? ((parseInt(slider.value) || 0) % 60000) / 1000 : (v ? v.currentTime : 0);
+    updateSeiTelemetryFromVideo(curSec, (v && v.duration && !isNaN(v.duration)) ? v.duration : 60);
+    return;
+  }
+
+  // Not yet cached - fetch and decode in background without wiping display
+  try {
+    const msgs = await fetchAndCacheSei(videoUrl);
+    if (g_currentSeiUrl !== videoUrl) return;
+
+    g_currentSeiMessages = msgs;
+    const slider = document.getElementById('position');
+    const v = document.getElementById('frontview');
+    const curSec = slider ? ((parseInt(slider.value) || 0) % 60000) / 1000 : (v ? v.currentTime : 0);
+    updateSeiTelemetryFromVideo(curSec, (v && v.duration && !isNaN(v.duration)) ? v.duration : 60);
+  } catch (err) {
+    console.warn("[SEI] Failed to load SEI for", videoUrl, err);
+  }
+}
+
+function clearSeiData() {
+  g_currentSeiUrl = null;
+  g_currentSeiMessages = null;
+  renderSeiTelemetry(null);
+}
+
+function updateSeiTelemetryFromVideo(currentTime, duration) {
+  if (!g_currentSeiMessages && g_currentSeiUrl && g_seiCache.has(g_currentSeiUrl)) {
+    g_currentSeiMessages = g_seiCache.get(g_currentSeiUrl);
+  }
+
+  if (!g_currentSeiMessages) {
+    // SEI data is loading in background - do not hide HUD while waiting
+    return;
+  }
+
+  if (g_currentSeiMessages.length === 0) {
+    // Explicitly 0 frames (vehicle parked)
+    renderSeiTelemetry(null);
+    return;
+  }
+
+  const dur = (duration && duration > 0 && !isNaN(duration)) ? duration : 60;
+  const t = (currentTime !== undefined && !isNaN(currentTime)) ? currentTime : 0;
+  const ratio = Math.max(0, Math.min(1, t / dur));
+  const idx = Math.min(g_currentSeiMessages.length - 1, Math.floor(ratio * g_currentSeiMessages.length));
+  renderSeiTelemetry(g_currentSeiMessages[idx], idx, g_currentSeiMessages.length);
+}
+
+function renderSeiTelemetry(msg, frameIdx, totalFrames) {
+  const bar = document.getElementById('telemetry-dashboard-bar');
+  if (!msg) {
+    if (bar) bar.style.display = 'none';
+    return;
+  }
+  if (bar) bar.style.display = 'flex';
+
+  // vehicle_speed_mps is in meters per second
+  const speedMps = (typeof msg.vehicleSpeedMps === 'number') ? msg.vehicleSpeedMps : (typeof msg.vehicle_speed_mps === 'number' ? msg.vehicle_speed_mps : 0);
+  
+  let steerAngle = (typeof msg.steeringWheelAngle === 'number') ? msg.steeringWheelAngle : (typeof msg.steering_wheel_angle === 'number' ? msg.steering_wheel_angle : 0);
+  const steerValid = !isNaN(steerAngle) && Math.abs(steerAngle) <= 900;
+
+  const gear = msg.gearState ?? msg.gear_state ?? 0;
+  const apState = msg.autopilotState ?? msg.autopilot_state ?? 0;
+  const isBrake = Boolean(msg.brakeApplied ?? msg.brake_applied);
+  const blinkL = Boolean(msg.blinkerOnLeft ?? msg.blinker_on_left);
+  const blinkR = Boolean(msg.blinkerOnRight ?? msg.blinker_on_right);
+
+  let rawPedal = (typeof msg.acceleratorPedalPosition === 'number') ? msg.acceleratorPedalPosition : (typeof msg.accelerator_pedal_position === 'number' ? msg.accelerator_pedal_position : 0);
+  const clampedPedal = Math.max(0, Math.min(100, Math.round(isNaN(rawPedal) ? 0 : rawPedal)));
+
+  const lat = (typeof msg.latitudeDeg === 'number') ? msg.latitudeDeg : msg.latitude_deg;
+  const lon = (typeof msg.longitudeDeg === 'number') ? msg.longitudeDeg : msg.longitude_deg;
+  const heading = (typeof msg.headingDeg === 'number') ? msg.headingDeg : msg.heading_deg;
+
+  // Calculated speeds
+  const kmh = Math.round(speedMps * 3.6);
+  const mph = Math.round(speedMps * 2.23694);
+
+  // Autopilot
+  let apText = "MANUAL";
+  let apBg = "#30363d";
+  let apColor = "#8b949e";
+  if (apState === 1 || apState === "SELF_DRIVING") { apText = "FSD"; apBg = "#1e88e5"; apColor = "#fff"; }
+  else if (apState === 2 || apState === "AUTOSTEER") { apText = "AUTOSTEER"; apBg = "#2e7d32"; apColor = "#fff"; }
+  else if (apState === 3 || apState === "TACC") { apText = "TACC"; apBg = "#ef6c00"; apColor = "#fff"; }
+
+  // Gear mapping
+  let gearText = "D";
+  if (gear === 0 || gear === "GEAR_PARK" || gear === "PARK") gearText = "P";
+  else if (gear === 1 || gear === "GEAR_DRIVE" || gear === "DRIVE") gearText = "D";
+  else if (gear === 2 || gear === "GEAR_REVERSE" || gear === "REVERSE") gearText = "R";
+  else if (gear === 3 || gear === "GEAR_NEUTRAL" || gear === "NEUTRAL") gearText = "N";
+
+  // Update Telemetry Bar elements
+  const elKmh = document.getElementById('dash-speed-kmh');
+  if (elKmh) elKmh.textContent = `${kmh} km/h`;
+  const elMph = document.getElementById('dash-speed-mph');
+  if (elMph) elMph.textContent = `${mph} mph`;
+
+  const elGear = document.getElementById('dash-gear');
+  if (elGear) elGear.textContent = gearText;
+
+  const elAp = document.getElementById('dash-ap');
+  if (elAp) {
+    elAp.textContent = apText;
+    elAp.style.background = apBg;
+    elAp.style.color = apColor;
+  }
+
+  const elBrake = document.getElementById('dash-brake');
+  if (elBrake) {
+    if (isBrake) {
+      elBrake.style.background = "#d32f2f";
+      elBrake.style.borderColor = "#ff5252";
+      elBrake.style.color = "#ffffff";
+      elBrake.style.boxShadow = "0 0 8px rgba(255,82,82,0.4)";
+    } else {
+      elBrake.style.background = "transparent";
+      elBrake.style.borderColor = "#30363d";
+      elBrake.style.color = "#484f58";
+      elBrake.style.boxShadow = "none";
+    }
+  }
+
+  const elSteer = document.getElementById('dash-steer');
+  if (elSteer) {
+    elSteer.textContent = steerValid ? `${steerAngle > 0 ? "+" : ""}${steerAngle.toFixed(1)}°` : "--°";
+  }
+
+  const elPedal = document.getElementById('dash-pedal');
+  if (elPedal) {
+    elPedal.textContent = `${clampedPedal}%`;
+  }
+
+  const elBlinkL = document.getElementById('dash-blink-left');
+  if (elBlinkL) {
+    elBlinkL.style.color = blinkL ? "#00e676" : "#484f58";
+    elBlinkL.style.textShadow = blinkL ? "0 0 8px #00e676" : "none";
+  }
+
+  const elBlinkR = document.getElementById('dash-blink-right');
+  if (elBlinkR) {
+    elBlinkR.style.color = blinkR ? "#00e676" : "#484f58";
+    elBlinkR.style.textShadow = blinkR ? "0 0 8px #00e676" : "none";
+  }
+
+  const elMps = document.getElementById('dash-mps');
+  if (elMps) {
+    elMps.textContent = `${speedMps.toFixed(1)} m/s`;
+  }
+
+  const elGps = document.getElementById('dash-gps');
+  if (elGps) {
+    if (lat != null && lon != null && (lat !== 0 || lon !== 0) && !isNaN(lat) && !isNaN(lon)) {
+      const headingStr = (heading != null && !isNaN(heading)) ? ` | ${Math.round(heading)}°` : '';
+      elGps.textContent = `${lat.toFixed(5)}°, ${lon.toFixed(5)}°${headingStr}`;
+    } else {
+      elGps.textContent = "--";
+    }
+  }
+
+  // Update map iframe if driving clip has GPS but no event.json
+  if (lat != null && lon != null && (lat !== 0 || lon !== 0) && !isNaN(lat) && !isNaN(lon)) {
+    const map = document.getElementById('sentrymap');
+    if (map && (!map.src || map.src === 'about:blank' || map.src === '')) {
+      map.src = "https://www.bing.com/maps/embed?w=" + map.clientWidth + "&h=" + map.clientHeight +
+                "&cp=" + lat + "~" + lon + "&lvl=18&typ=d&sty=h&src=SHELL&FORM=MBEDV8";
+    }
+  }
+
+  const elFrame = document.getElementById('dash-frame');
+  if (elFrame && totalFrames) {
+    elFrame.textContent = `${frameIdx + 1}/${totalFrames}`;
+  }
+}
 
 </script>
 </body>
